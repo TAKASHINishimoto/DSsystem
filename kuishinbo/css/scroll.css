@@ -1,0 +1,109 @@
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+.led-text {
+    background-color: #333333;
+    color: #FFB400;
+    font-size: 80px;
+    font-weight: bold;
+    overflow: hidden;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    position: relative;
+    width: 100%;
+}
+
+.led-text:after {
+    content: ' ';
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: url("http://k1blog.com/wp-content/uploads/2014/02/led_bg.png") repeat scroll 0 0 rgba(0, 0, 0, 0);
+    background-size: 4px 4px, 4px 4px;
+    z-index: 10;
+}
+
+ul.led-text li {
+    display: inline-block;
+  white-space: nowrap;
+  padding-left: 100%;
+  -webkit-animation-name: ticker-animation;
+  -webkit-animation-timing-function: linear;
+  -webkit-animation-iteration-count: infinite;
+  -webkit-animation-duration: 10s;
+  -moz-animation-name: ticker-animation;
+  -moz-animation-timing-function: linear;
+  -moz-animation-iteration-count: infinite;
+  -moz-animation-duration: 10s;
+}
+
+@-webkit-keyframes ticker-animation {
+  from   { -webkit-transform: translate(0%);}
+  99%,to { -webkit-transform: translate(-100%);}
+}
+/* webkitのみで省略 */
+@-moz-keyframes ticker-animation {
+  from   { -moz-transform: translate(0%);}
+  99%,to { -moz-transform: translate(-100%);}
+}
+  
+
+
+  /* liScroll styles */
+
+.tickercontainer:after {
+    content: ' ';
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: url("http://k1blog.com/wp-content/uploads/2014/02/led_bg.png") repeat scroll 0 0 rgba(0, 0, 0, 0);
+    background-size: 4px 4px, 4px 4px;
+    z-index: 10;
+}
+
+.tickercontainer {
+    background-color: #333333;
+    color: #FFB400;
+    font-size: 80px;
+    font-weight: bold;
+    overflow: hidden;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    position: relative;
+    width: 100%;
+}
+
+ul.newsticker { /* that's your list */
+position: relative;
+left: 100%;
+font: bold 77px Verdana;
+list-style-type: none;
+margin: 0;
+padding: 0;
+
+}
+ul.newsticker li {
+float: left; /* important: display inline gives incorrect results when you check for elem's width */
+margin: 0;
+padding: 0;
+}
+ul.newsticker a {
+white-space: nowrap;
+padding: 0;
+color: #FFA500;/*#FFA500*/
+font: bold 110px Verdana;
+margin: 0 50px 0 0;
+} 
+ul.newsticker span {
+margin: 0 10px 0 0;
+} 
+

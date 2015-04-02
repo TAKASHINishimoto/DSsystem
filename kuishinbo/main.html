@@ -1,0 +1,259 @@
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<script src="js/jquery.min.js"></script>
+<script src="jsons.js"></script>
+
+<script>
+
+
+	/*
+	 * 番組を渡して 現在放送可能かbool値を返す関数
+	 * program:番組
+	 * return: true（放送可能）、false（放送不可）
+	 */
+	var canOnAirNow = function(program) {
+		var dateNow = new Date().getTime();
+		var dateBegin = new Date(program['program-begin']).getTime();
+		var dateEnd = new Date(program['program-end']).getTime();
+		return dateBegin < dateNow && dateNow < dateEnd;
+	}
+
+	// Video Image KUT7daysを非表示ににして消す関数
+	// return: なし
+	var hideImageAndVideo = function() {
+		$('#video').hide().attr("src", "");
+		$('#image').hide().attr("src", "");
+		$('#kut7days').hide();
+		$('#body').attr("background", "");
+		$('#koecard').hide();
+	}
+
+	// KUT7daysの秒数
+	var KUT7DAYSLENGTH = 5;
+
+	// 声のカードの秒数
+	var KOECARDLENGTH = 5;
+
+	// 画面の表示状態 メディア, KUT7days ...
+	// 列挙型のつもり
+	var STATE = {
+		MEDIA : 0,
+		KUT7DAYS : 1,
+		KOECARD: 2
+	};
+	// 初期状態はメディア
+	var state = STATE.MEDIA;
+
+	// program, 声のカードごとの秒数カウント用
+	var count = 0;
+	var i = 0;
+
+	// 中の匿名関数が1000msごとに呼ばれる
+	setInterval((function() {
+		var length = allProgramList.length;
+		// 状態遷移
+		switch (state) {
+		// メディアの状態
+		case STATE.MEDIA:
+
+			// 一周したらSTATE.KUT7DAYS状態へ
+			if (i == length) {
+				state = STATE.KUT7DAYS;
+				i = 0;
+				return ;
+			}
+
+			var programLong = allProgramList[i]['program-long'];
+			// カウントがprogramLongに達したら次の番組へ
+			if (programLong <= count) {
+				i++;
+				// カウントリセット
+				count = 0;
+				return ;
+			}
+
+			// カウントが0だったら番組を新たに表示
+			if (count == 0) {
+				// 放送できない時間だったらスキップ
+				if (!canOnAirNow(allProgramList[i])) {
+					count = 0;
+					i++;
+					return ;
+				}
+				// いったん全部消して
+				hideImageAndVideo();
+
+				var contentType = allProgramList[i]['content-type'];
+				var media = allProgramList[i]['media'];
+				// メディアが動画か画像によって処理変更して表示
+				if (contentType.indexOf('video') != -1) {
+					$('#video').show().attr("src", ("data:" + contentType + ";base64," + media));
+				} else if (contentType.indexOf('image') != -1) {
+					$('#image').show().attr("src", ("data:" + contentType + ";base64," + media));
+				} else {
+					console.log('video, image以外のメディアです。');
+				}
+			}
+			count++;
+			break ;
+
+		// KUT7DAYSの状態
+		case STATE.KUT7DAYS:
+			// カウントがKUT7DAYSLENGTHに達したらKOECARD状態へ
+			if (KUT7DAYSLENGTH <= count) {
+				state = STATE.KOECARD;
+				// カウントリセット
+				count = 0;
+				return ;
+			}
+			if (count == 0) {
+				// いったん全部消して
+				hideImageAndVideo();
+				$('#kut7days').show();
+				$('#body').attr("background", ("data:" + kut7days['bg-contetn-type']
+				+ ";base64," + kut7days['bg-image']));
+
+				var weekArray = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+				for (j = 0; j < kut7days['week-schedule'].length; j++) {
+					$("#" + weekArray[j]).html(kut7days['week-schedule'][j]);
+				}
+			}
+			count++;
+			break ;
+		// KOECARDの状態
+		case STATE.KOECARD:
+
+			// 一周したらSTATE.MEDEA状態へ
+			if (i == allKoeCards.length) {
+				state = STATE.MEDIA;
+				i = 0;
+				return ;
+			}
+
+			// カウントがKOECARDLENGTHに達したら次の番組へ
+			if (KOECARDLENGTH <= count) {
+				i++;
+				// カウントリセット
+				count = 0;
+				return ;
+			}
+
+			// カウントが0だった声のカードを新たに表示
+			if (count == 0) {
+
+				// いったん全部消して
+				hideImageAndVideo();
+
+				$('#koecard').show();
+				var contentType = allProgramList[i]['content-type'];
+				var media = allProgramList[i]['media'];
+				var koeCardAttributes = ['title', 'contribute-name', 'response-name',
+				                         'contribute-comment', 'response-comment'];
+
+				for (var attr in koeCardAttributes) {
+					$("#" + koeCardAttributes[attr]).html(allKoeCards[i][koeCardAttributes[attr]]);
+
+				}
+			}
+			count++;
+			break ;
+		default:
+		}
+
+	}), 1000);
+</script>
+
+</head>
+<body id="body" background="">
+	<!-- 画像 -->
+	<img id='image' src="" width="100%" height="100%">
+
+	<!-- 動画 -->
+	<video id='video' autoplay loop width="100%" height="100%">
+		<source id='video' width="100%" height="100%" src="">
+	</video>
+
+	<!-- KUT7Days -->
+	<section id="kut7days" class="container">
+		<div class="row">
+			<!-- 6:6で横分割してから縦に並べる -->
+			<div class="col-xs-6">
+				<div class="panel panel-warning">
+					<div class="panel-heading">
+						<div class="panel-title">月曜日</div>
+					</div>
+					<div id="mon" class="panel-body"></div>
+				</div>
+				<div class="panel panel-warning">
+					<div class="panel-heading">
+						<div class="panel-title">火曜日</div>
+					</div>
+					<div id="tue" class="panel-body"></div>
+				</div>
+				<div class="panel panel-warning">
+					<div class="panel-heading">
+						<div class="panel-title">水曜日</div>
+					</div>
+					<div id="wed" class="panel-body"></div>
+				</div>
+				<div class="panel panel-warning">
+					<div class="panel-heading">
+						<div class="panel-title">木曜日</div>
+					</div>
+					<div id="thu" class="panel-body"></div>
+				</div>
+			</div>
+			<div class="col-xs-6">
+				<div class="panel panel-warning">
+					<div class="panel-heading">
+						<div class="panel-title">金曜日</div>
+					</div>
+					<div id="fri" class="panel-body"></div>
+				</div>
+				<div class="panel panel-info">
+					<div class="panel-heading">
+						<div class="panel-title">土曜日</div>
+					</div>
+					<div id="sat" class="panel-body"></div>
+				</div>
+				<div class="panel panel-danger">
+					<div class="panel-heading">
+						<div class="panel-title">日曜日</div>
+					</div>
+					<div id="sun" class="panel-body"></div>
+				</div>
+
+			</div>
+		</div>
+	</section>
+
+	<!-- 声のカード -->
+	<section id="koecard" class="container">
+		<div class="panel panel-success">
+			<div class="panel-heading">
+				<div id="title" class="panel-title"></div>
+			</div>
+		</div>
+		<div class="row">
+			<!-- 6:6で横分割してから縦に並べる -->
+			<div class="col-xs-6">
+				<div class="panel panel-warning">
+					<div class="panel-heading">
+						<div id="contribute-name" class="panel-title"></div>
+					</div>
+					<div id="contribute-comment" class="panel-body"></div>
+				</div>
+			</div>
+			<div class="col-xs-6">
+				<div class="panel panel-danger">
+					<div class="panel-heading">
+						<div id="response-name" class="panel-title"></div>
+					</div>
+					<div id="response-comment" class="panel-body"></div>
+				</div>
+
+			</div>
+		</div>
+	</section>
+</body>

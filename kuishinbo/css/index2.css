@@ -1,0 +1,40 @@
+html, body {
+	width : 100%;
+	height : 100%;
+	margin : 0;
+	padding: 0;
+	overflow: hidden;
+	background-color: white;
+}
+
+iframe {
+	border: none;
+}
+
+#main {
+	float: left;
+	width: 80%;
+	height: 80%;
+	background-color: black;
+}
+#live {
+	width: 20%;
+	height: 30%;
+	margin: 0;
+	padding: 0;
+	background-color: green;
+}
+
+#weather {
+	width: 20%;
+	height: 57%;
+	margin: 0;
+	padding: 0;
+	background-image: url("fuyu.gif")
+}
+#news {
+	clear: both;
+	width: 100%;
+	height: 20%;
+	background-color: #000000;
+}
